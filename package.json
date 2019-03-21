@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tasmota-http-led-strip",
-  "version": "1.9.0",
+  "version": "0.0.1",
   "description": "Control WS2812B LED Strip with Tasmota firmware through Homebridge",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "url": "git+https://github.com/lukasa1993/homebridge-tasmota-http-led-strip.git"
   },
   "bugs": {
-    "url": "https://github.com/lukasa1993/homebridge-tasmota-http-led-strip.git/issues"
+    "url": "https://github.com/lukasa1993/homebridge-tasmota-http-led-strip/issues"
   },
   "homepage": "https://github.com/lukasa1993/homebridge-tasmota-http-led-strip.git#readme"
 }
