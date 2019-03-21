@@ -50,7 +50,10 @@ function TasmotaHTTPLEDStripAccessory(log, config) {
 TasmotaHTTPLEDStripAccessory.prototype = {
   _request(cmd, cb) {
     const url = 'http://' + this.hostname + '/cm' + this.auth_url + '&cmnd=' + cmd;
-    request(url, cb);
+      request({
+    uro:url,
+    timeout:200,
+  }, cb);
   },
   getState:      function (callback) {
     const that = this;
