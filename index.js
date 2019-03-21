@@ -6,14 +6,14 @@ module.exports = function (homebridge) {
   Service        = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
 
-  homebridge.registerAccessory('homebridge-sonoff-tasmota-http-led', 'SonoffTasmotaHTTPLED', SonoffTasmotaHTTPLEDAccessory);
+  homebridge.registerAccessory('homebridge-tasmota-http-led-strip', 'TasmotaHTTPLEDStrip', TasmotaHTTPLEDStripAccessory);
 };
 
-function SonoffTasmotaHTTPLEDAccessory(log, config) {
+function TasmotaHTTPLEDStripAccessory(log, config) {
   this.log      = log;
   this.config   = config;
   this.name     = this.config['name'];
-  this.hostname = this.config['hostname'] || 'sonoff';
+  this.hostname = this.config['hostname'] || 'led_strip';
   this.user     = this.config['user'] || 'admin';
   this.pass     = this.config['pass'] || 'admin';
   this.auth_url = '?user=' + this.user + '&password=' + this.pass;
@@ -47,7 +47,7 @@ function SonoffTasmotaHTTPLEDAccessory(log, config) {
   this.log('LNH-Strip Initialized');
 }
 
-SonoffTasmotaHTTPLEDAccessory.prototype = {
+TasmotaHTTPLEDStripAccessory.prototype = {
   _request(cmd, cb) {
     const url = 'http://' + this.hostname + '/cm' + this.auth_url + '&cmnd=' + cmd;
     request(url, cb);
@@ -60,7 +60,7 @@ SonoffTasmotaHTTPLEDAccessory.prototype = {
         return callback(error);
       }
       const json = JSON.parse(body);
-      that.log('Sonoff LED: ' + that.hostname + ' Get State: ' + json.POWER);
+      that.log('LED: ' + that.hostname + ' Get State: ' + json.POWER);
       if (json.POWER === 'OFF') {
         callback(null, 0);
       } else if (json.POWER === 'ON') {
@@ -79,7 +79,7 @@ SonoffTasmotaHTTPLEDAccessory.prototype = {
         return callback(error);
       }
       var json = JSON.parse(body);
-      that.log('Sonoff LED: ' + that.hostname + ' Set State to: ' + json.POWER);
+      that.log('LED: ' + that.hostname + ' Set State to: ' + json.POWER);
       if (json.POWER === 'OFF') {
         callback();
       }
@@ -95,7 +95,7 @@ SonoffTasmotaHTTPLEDAccessory.prototype = {
         return callback(error);
       }
       const jsonreply = JSON.parse(body);
-      that.log('Sonoff LED: ' + that.hostname + ' Get Brightness: ' + jsonreply.Dimmer);
+      that.log('LED: ' + that.hostname + ' Get Brightness: ' + jsonreply.Dimmer);
       callback(null, jsonreply.Dimmer);
     });
   },
@@ -106,11 +106,11 @@ SonoffTasmotaHTTPLEDAccessory.prototype = {
         return callback(error);
       }
       const jsonreply = JSON.parse(body);
-      that.log('Sonoff LED: ' + that.hostname + ' Set Brightness to: ' + jsonreply.Dimmer);
+      that.log('LED: ' + that.hostname + ' Set Brightness to: ' + jsonreply.Dimmer);
       if (jsonreply.Dimmer === brightness) {
         callback();
       } else {
-        that.log('Sonoff LED: ' + that.hostname + ' ERROR Setting Brightness to: ' + brightness);
+        that.log('LED: ' + that.hostname + ' ERROR Setting Brightness to: ' + brightness);
         callback();
       }
     });
