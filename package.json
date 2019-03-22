@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tasmota-http-led-strip",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Control WS2812B LED Strip with Tasmota firmware through Homebridge",
   "main": "index.js",
   "scripts": {

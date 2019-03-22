@@ -13,6 +13,8 @@ function TasmotaHTTPLEDStripAccessory(log, config) {
   this.log      = log;
   this.config   = config;
   this.name     = this.config['name'];
+  this.relay    = this.config['relay'] || '';
+  this.timeout  = this.config['timeout'] || 10000;
   this.hostname = this.config['hostname'] || 'led_strip';
   this.user     = this.config['user'] || 'admin';
   this.pass     = this.config['pass'] || 'admin';
@@ -50,23 +52,26 @@ function TasmotaHTTPLEDStripAccessory(log, config) {
 TasmotaHTTPLEDStripAccessory.prototype = {
   _request(cmd, cb) {
     const url = 'http://' + this.hostname + '/cm' + this.auth_url + '&cmnd=' + cmd;
+    this.log('requesting: ' + url);
     request({
       uri:     url,
-      timeout: 200,
+      timeout: this.timeout,
     }, cb);
   },
   getState:      function (callback) {
-    const that = this;
+    const self = this;
 
-    this._request('Power', function (error, response, body) {
+    this._request('Power' + this.relay, function (error, response, body) {
       if (error) {
+        self.log('error: ' + error);
         return callback(error);
       }
-      const json = JSON.parse(body);
-      that.log('LED: ' + that.hostname + ' Get State: ' + json.POWER);
-      if (json.POWER === 'OFF') {
+      const json  = JSON.parse(body);
+      const power = json['POWER' + self.relay];
+      self.log('LED: ' + self.hostname + ' Get State: ' + power);
+      if (power === 'OFF') {
         callback(null, 0);
-      } else if (json.POWER === 'ON') {
+      } else if (power === 'ON') {
         callback(null, 1);
       }
     });
@@ -76,52 +81,58 @@ TasmotaHTTPLEDStripAccessory.prototype = {
     if (toggle) {
       newstate = '%20On';
     }
-    const that = this;
-    this._request('Power' + newstate, function (error, response, body) {
+    const self = this;
+    this._request('Power' + this.relay + newstate, function (error, response, body) {
       if (error) {
+        self.log('error: ' + error);
         return callback(error);
       }
-      var json = JSON.parse(body);
-      that.log('LED: ' + that.hostname + ' Set State to: ' + json.POWER);
-      if (json.POWER === 'OFF') {
+      var json    = JSON.parse(body);
+      const power = json['POWER' + self.relay];
+      self.log('LED: ' + self.hostname + ' Set State to: ' + power);
+      if (power === 'OFF') {
         callback();
       }
-      if (json.POWER === 'ON') {
+      if (power === 'ON') {
         callback();
       }
     });
   },
   getBrightness: function (callback) {
-    const that = this;
+    const self = this;
     this._request('Dimmer', function (error, response, body) {
       if (error) {
+        self.log('error: ' + error);
         return callback(error);
       }
       const jsonreply = JSON.parse(body);
-      that.log('LED: ' + that.hostname + ' Get Brightness: ' + jsonreply.Dimmer);
+      self.log('LED: ' + self.hostname + ' Get Brightness: ' + jsonreply.Dimmer);
       callback(null, jsonreply.Dimmer);
     });
   },
   setBrightness: function (brightness, callback) {
-    const that = this;
+    const self = this;
     this._request('HsbColor3%20' + brightness, function (error, response, body) {
       if (error) {
+        self.log('error: ' + error);
         return callback(error);
       }
       const jsonreply = JSON.parse(body);
-      that.log('LED: ' + that.hostname + ' Set Brightness to: ' + jsonreply.Dimmer);
+      self.log('LED: ' + self.hostname + ' Set Brightness to: ' + jsonreply.Dimmer);
       if (jsonreply.Dimmer === brightness) {
         callback();
       } else {
-        that.log('LED: ' + that.hostname + ' ERROR Setting Brightness to: ' + brightness);
+        self.log('LED: ' + self.hostname + ' ERROR Setting Brightness to: ' + brightness);
         callback();
       }
     });
   },
 
   getHue: function (callback) {
+    const self = this;
     this._request('HsbColor', function (error, response, responseBody) {
       if (error) {
+        self.log('error: ' + error);
         return callback(error);
       }
       const json     = JSON.parse(responseBody);
@@ -132,8 +143,10 @@ TasmotaHTTPLEDStripAccessory.prototype = {
   },
 
   setHue: function (level, callback) {
+    const self = this;
     this._request('HsbColor1%20' + level, function (error, response, responseBody) {
       if (error) {
+        self.log('error: ' + error);
         return callback(error);
       }
       callback();
@@ -141,8 +154,10 @@ TasmotaHTTPLEDStripAccessory.prototype = {
   },
 
   getSaturation: function (callback) {
+    const self = this;
     this._request('HsbColor', function (error, response, responseBody) {
       if (error) {
+        self.log('error: ' + error);
         return callback(error);
       }
       const json     = JSON.parse(responseBody);
