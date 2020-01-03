@@ -102,7 +102,7 @@ TasmotaHTTPDimmerAccessory.prototype = {
   },
   setBrightness: function (brightness, callback) {
     const self = this;
-    this._request('HsbColor3%20' + brightness, function (error, response, body) {
+    this._request('Dimmer%20' + brightness, function (error, response, body) {
       if (error) {
         self.log('error: ' + error);
         return callback(error);

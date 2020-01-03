@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tasmota-http-dimmer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Control Dimmer Tasmota firmware through Homebridge",
   "main": "index.js",
   "scripts": {
