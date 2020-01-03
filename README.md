@@ -5,8 +5,8 @@
 ```
 "accessories": [
     {
-        "accessory": "TasmotaHTTPLEDStrip",
-        "name": "Led-Strip",
+        "accessory": "TasmotaHTTPDimmer",
+        "name": "dimmer",
         "hostname": "192.168.1.219",
         "user":"admin",
         "pass":"adminpassword"

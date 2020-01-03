@@ -6,10 +6,10 @@ module.exports = function (homebridge) {
   Service        = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
 
-  homebridge.registerAccessory('homebridge-tasmota-http-led-strip', 'TasmotaHTTPLEDStrip', TasmotaHTTPLEDStripAccessory);
+  homebridge.registerAccessory('homebridge-tasmota-http-dimmer', 'TasmotaHTTPDimmer', TasmotaHTTPDimmerAccessory);
 };
 
-function TasmotaHTTPLEDStripAccessory(log, config) {
+function TasmotaHTTPDimmerAccessory(log, config) {
   this.log      = log;
   this.config   = config;
   this.name     = this.config['name'];
@@ -36,20 +36,10 @@ function TasmotaHTTPLEDStripAccessory(log, config) {
       .on('get', this.getBrightness.bind(this))
       .on('set', this.setBrightness.bind(this));
 
-  this.service
-      .addCharacteristic(new Characteristic.Hue())
-      .on('get', this.getHue.bind(this))
-      .on('set', this.setHue.bind(this));
-
-  this.service
-      .addCharacteristic(new Characteristic.Saturation())
-      .on('get', this.getSaturation.bind(this))
-      .on('set', this.setSaturation.bind(this));
-
   this.log('LNH-Strip Initialized');
 }
 
-TasmotaHTTPLEDStripAccessory.prototype = {
+TasmotaHTTPDimmerAccessory.prototype = {
   _request(cmd, cb) {
     const url = 'http://' + this.hostname + '/cm' + this.auth_url + '&cmnd=' + cmd;
     this.log('requesting: ' + url);
@@ -125,51 +115,6 @@ TasmotaHTTPLEDStripAccessory.prototype = {
         self.log('LED: ' + self.hostname + ' ERROR Setting Brightness to: ' + brightness);
         callback();
       }
-    });
-  },
-
-  getHue: function (callback) {
-    const self = this;
-    this._request('HsbColor', function (error, response, responseBody) {
-      if (error) {
-        self.log('error: ' + error);
-        return callback(error);
-      }
-      const json     = JSON.parse(responseBody);
-      const hsbcolor = json.HSBColor;
-      const hsb      = hsbcolor.split(',');
-      callback(null, hsb[0]);
-    });
-  },
-
-  setHue: function (level, callback) {
-    const self = this;
-    this._request('HsbColor1%20' + level, function (error, response, responseBody) {
-      if (error) {
-        self.log('error: ' + error);
-        return callback(error);
-      }
-      callback();
-    });
-  },
-
-  getSaturation: function (callback) {
-    const self = this;
-    this._request('HsbColor', function (error, response, responseBody) {
-      if (error) {
-        self.log('error: ' + error);
-        return callback(error);
-      }
-      const json     = JSON.parse(responseBody);
-      const hsbcolor = json.HSBColor;
-      const hsb      = hsbcolor.split(',');
-      callback(null, hsb[1]);
-    });
-  },
-
-  setSaturation: function (level, callback) {
-    this._request('HsbColor2%20' + level, function (error, response, responseBody) {
-      callback();
     });
   },
   getServices:   function () {
