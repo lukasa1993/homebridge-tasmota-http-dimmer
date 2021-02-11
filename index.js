@@ -1,6 +1,6 @@
 var Service,
     Characteristic;
-var request = require('request');
+var fetch = require('node-fetch');
 
 module.exports = function (homebridge) {
   Service        = homebridge.hap.Service;
@@ -28,13 +28,13 @@ function TasmotaHTTPDimmerAccessory(log, config) {
 
   this.service = new Service.Lightbulb(this.name);
   this.service
-      .getCharacteristic(Characteristic.On)
-      .on('get', this.getState.bind(this))
-      .on('set', this.setState.bind(this));
+    .getCharacteristic(Characteristic.On)
+    .on('get', this.getState.bind(this))
+    .on('set', this.setState.bind(this));
   this.service
-      .addCharacteristic(new Characteristic.Brightness())
-      .on('get', this.getBrightness.bind(this))
-      .on('set', this.setBrightness.bind(this));
+    .addCharacteristic(new Characteristic.Brightness())
+    .on('get', this.getBrightness.bind(this))
+    .on('set', this.setBrightness.bind(this));
 
   this.log('LNH-Strip Initialized');
 }
@@ -43,10 +43,19 @@ TasmotaHTTPDimmerAccessory.prototype = {
   _request(cmd, cb) {
     const url = 'http://' + this.hostname + '/cm' + this.auth_url + '&cmnd=' + cmd;
     this.log('requesting: ' + url);
-    request({
-      uri:     url,
-      timeout: this.timeout,
-    }, cb);
+    setTimeout(async () => {
+      const res = await fetch(url, {
+        timeout: this.timeout,
+      });
+      let error,
+          text;
+      try {
+        text = await res.text();
+      } catch (e) {
+        error = e;
+      }
+      cb(error, text, text);
+    }, 1);
   },
   getState:      function (callback) {
     const self = this;
