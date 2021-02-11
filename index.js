@@ -1,6 +1,11 @@
 var Service,
     Characteristic;
 var fetch = require('node-fetch');
+var Queue = require('promise-queue');
+
+var maxConcurrent = 1;
+var maxQueue      = Infinity;
+var queue         = new Queue(maxConcurrent, maxQueue);
 
 module.exports = function (homebridge) {
   Service        = homebridge.hap.Service;
@@ -43,7 +48,7 @@ TasmotaHTTPDimmerAccessory.prototype = {
   _request(cmd, cb) {
     const url = 'http://' + this.hostname + '/cm' + this.auth_url + '&cmnd=' + cmd;
     this.log('requesting: ' + url);
-    setTimeout(async () => {
+    queue.add(async () => {
       const res = await fetch(url, {
         timeout: this.timeout,
       });
@@ -55,7 +60,7 @@ TasmotaHTTPDimmerAccessory.prototype = {
         error = e;
       }
       cb(error, text, text);
-    }, 1);
+    });
   },
   getState:      function (callback) {
     const self = this;
